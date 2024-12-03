@@ -18,7 +18,9 @@ public class HandlerIntegerJava17 implements RequestHandler<SQSEvent, Void> {
 
     private void processMessage(SQSMessage msg, Context context) {
         try {
-            context.getLogger().log("Processed message " + msg.getBody());
+
+            String msgBody = msg.getBody();
+            context.getLogger().log("Processed message " + msgBody);
 
             // TODO: Do interesting work based on the new message
 

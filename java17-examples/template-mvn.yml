@@ -19,3 +19,23 @@ Resources:
         - AWSLambdaVPCAccessExecutionRole
         - AWSLambdaSQSQueueExecutionRole
       Tracing: Active
+      Events:
+        SQSQueue:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt SQSQueue.Arn
+            BatchSize: 10
+
+
+  SQSQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: MyLambdaQueue
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt DeadLetterQueue.Arn
+        maxReceiveCount: 3
+
+  DeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: MyLambdaDeadLetterQueue

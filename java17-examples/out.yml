@@ -5,7 +5,7 @@ Resources:
   function:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://lambda-artifacts-a2fc6d0a966ac021/0194591659838bb7775661ea1abf91f4
+      CodeUri: s3://lambda-artifacts-a2fc6d0a966ac021/4d109a4fa86c06553cd9a3e294e0c105
       Handler: example.HandlerIntegerJava17
       Runtime: java17
       Description: Java function
@@ -16,4 +16,28 @@ Resources:
       - AWSLambda_ReadOnlyAccess
       - AWSXrayWriteOnlyAccess
       - AWSLambdaVPCAccessExecutionRole
+      - AWSLambdaSQSQueueExecutionRole
       Tracing: Active
+      Events:
+        SQSQueue:
+          Type: SQS
+          Properties:
+            Queue:
+              Fn::GetAtt:
+              - SQSQueue
+              - Arn
+            BatchSize: 10
+  SQSQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: MyLambdaQueue
+      RedrivePolicy:
+        deadLetterTargetArn:
+          Fn::GetAtt:
+          - DeadLetterQueue
+          - Arn
+        maxReceiveCount: 3
+  DeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: MyLambdaDeadLetterQueue
