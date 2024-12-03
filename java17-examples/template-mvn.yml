@@ -26,6 +26,10 @@ Resources:
               Action:
                 - secretsmanager:GetSecretValue
               Resource: !Ref LambdaSecret
+            - Effect: Allow
+              Action:
+                - s3:*
+              Resource: ["*"]
       Tracing: Active
       Environment:
         Variables:

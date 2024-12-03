@@ -9,7 +9,7 @@ Resources:
     - SQSQueue
     - DeadLetterQueue
     Properties:
-      CodeUri: s3://lambda-artifacts-a2fc6d0a966ac021/1f137f4bb12477912eb916f47a4cd625
+      CodeUri: s3://lambda-artifacts-a2fc6d0a966ac021/20cee435509215104500c401f7284a54
       Handler: example.HandlerIntegerJava17
       Runtime: java17
       Description: Java function
@@ -28,6 +28,11 @@ Resources:
           - secretsmanager:GetSecretValue
           Resource:
             Ref: LambdaSecret
+        - Effect: Allow
+          Action:
+          - s3:*
+          Resource:
+          - '*'
       Tracing: Active
       Environment:
         Variables:

@@ -5,7 +5,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 
-// required when using vault
+// required when using secret manager
 import com.amazonaws.services.secretsmanager.AWSSecretsManager;
 import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
 import com.amazonaws.services.secretsmanager.model.GetSecretValueRequest;
@@ -30,6 +30,8 @@ public class HandlerIntegerJava17 implements RequestHandler<SQSEvent, Void> {
         for (SQSMessage msg : sqsEvent.getRecords()) {
             processMessage(msg, context);
         }
+
+
         context.getLogger().log("done");
         return null;
     }
@@ -65,6 +67,7 @@ public class HandlerIntegerJava17 implements RequestHandler<SQSEvent, Void> {
         String secret = getSecretValueResult.getSecretString();
         return secret;
     }
-
-
 }
+    
+
+
