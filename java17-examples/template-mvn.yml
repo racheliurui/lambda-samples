@@ -5,7 +5,6 @@ Resources:
 
   function:
     Type: AWS::Serverless::Function
-    DependsOn: [LambdaSecret, SQSQueue, DeadLetterQueue]
     Properties:
       CodeUri: target/java17-examples-1.0-SNAPSHOT.jar
       Handler: example.HandlerIntegerJava17
@@ -19,48 +18,12 @@ Resources:
         - AWSLambda_ReadOnlyAccess
         - AWSXrayWriteOnlyAccess
         - AWSLambdaVPCAccessExecutionRole
-        - AWSLambdaSQSQueueExecutionRole
-        - Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Action:
-                - secretsmanager:GetSecretValue
-              Resource: !Ref LambdaSecret
-            - Effect: Allow
-              Action:
-                - s3:*
-              Resource: ["*"]
       Tracing: Active
-      Environment:
-        Variables:
-          LAMBDA_SECRET: '{{resolve:secretsmanager:LambdaSecret:SecretString:password}}'
-          LAMBDA_SECRET_ARN: !Ref LambdaSecret
       Events:
-        SQSQueue:
-          Type: SQS
+        ScheduledEvent:
+          Type: Schedule
           Properties:
-            Queue: !GetAtt SQSQueue.Arn
-            BatchSize: 10
+            Schedule: rate(5 minutes)
 
 
-  SQSQueue:
-    Type: AWS::SQS::Queue
-    Properties:
-      QueueName: MyLambdaQueue
-      RedrivePolicy:
-        deadLetterTargetArn: !GetAtt DeadLetterQueue.Arn
-        maxReceiveCount: 3
 
-  DeadLetterQueue:
-    Type: AWS::SQS::Queue
-    Properties:
-      QueueName: MyLambdaDeadLetterQueue
-
-  LambdaSecret:
-    Type: AWS::SecretsManager::Secret
-    Properties:
-      Name: LambdaSecret
-      GenerateSecretString:
-        SecretStringTemplate: '{"password": "%%random-alpha-numeric:32%%"}'
-        GenerateStringKey: "password"
-        ExcludeCharacters: '"@/\'

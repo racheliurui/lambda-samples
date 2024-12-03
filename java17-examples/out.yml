@@ -4,12 +4,8 @@ Description: An AWS Lambda application that calls the Lambda API.
 Resources:
   function:
     Type: AWS::Serverless::Function
-    DependsOn:
-    - LambdaSecret
-    - SQSQueue
-    - DeadLetterQueue
     Properties:
-      CodeUri: s3://lambda-artifacts-a2fc6d0a966ac021/20cee435509215104500c401f7284a54
+      CodeUri: s3://lambda-artifacts-a2fc6d0a966ac021/3a0275307a169f12a230a7ea8b95209a
       Handler: example.HandlerIntegerJava17
       Runtime: java17
       Description: Java function
@@ -20,53 +16,9 @@ Resources:
       - AWSLambda_ReadOnlyAccess
       - AWSXrayWriteOnlyAccess
       - AWSLambdaVPCAccessExecutionRole
-      - AWSLambdaSQSQueueExecutionRole
-      - Version: '2012-10-17'
-        Statement:
-        - Effect: Allow
-          Action:
-          - secretsmanager:GetSecretValue
-          Resource:
-            Ref: LambdaSecret
-        - Effect: Allow
-          Action:
-          - s3:*
-          Resource:
-          - '*'
       Tracing: Active
-      Environment:
-        Variables:
-          LAMBDA_SECRET: '{{resolve:secretsmanager:LambdaSecret:SecretString:password}}'
-          LAMBDA_SECRET_ARN:
-            Ref: LambdaSecret
       Events:
-        SQSQueue:
-          Type: SQS
+        ScheduledEvent:
+          Type: Schedule
           Properties:
-            Queue:
-              Fn::GetAtt:
-              - SQSQueue
-              - Arn
-            BatchSize: 10
-  SQSQueue:
-    Type: AWS::SQS::Queue
-    Properties:
-      QueueName: MyLambdaQueue
-      RedrivePolicy:
-        deadLetterTargetArn:
-          Fn::GetAtt:
-          - DeadLetterQueue
-          - Arn
-        maxReceiveCount: 3
-  DeadLetterQueue:
-    Type: AWS::SQS::Queue
-    Properties:
-      QueueName: MyLambdaDeadLetterQueue
-  LambdaSecret:
-    Type: AWS::SecretsManager::Secret
-    Properties:
-      Name: LambdaSecret
-      GenerateSecretString:
-        SecretStringTemplate: '{"password": "%%random-alpha-numeric:32%%"}'
-        GenerateStringKey: password
-        ExcludeCharacters: '"@/\'
+            Schedule: rate(5 minutes)

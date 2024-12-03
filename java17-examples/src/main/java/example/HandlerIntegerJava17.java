@@ -1,71 +1,29 @@
 package example;
-import com.amazonaws.services.lambda.runtime.events.SQSEvent;
-import com.amazonaws.services.lambda.runtime.events.SQSEvent.SQSMessage;
 import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 
-// required when using secret manager
-import com.amazonaws.services.secretsmanager.AWSSecretsManager;
-import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
-import com.amazonaws.services.secretsmanager.model.GetSecretValueRequest;
-import com.amazonaws.services.secretsmanager.model.GetSecretValueResult;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
+
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 
 // Handler value: example.HandlerInteger
-public class HandlerIntegerJava17 implements RequestHandler<SQSEvent, Void> {
+public class HandlerIntegerJava17 implements RequestHandler<Object, String> {
+    private static final Logger logger = LogManager.getLogger(HandlerIntegerJava17.class);
+
     @Override
-    public Void handleRequest(SQSEvent sqsEvent, Context context) {
-
-        // get env varaible called LAMBDA_SECRET and print it out
-        String lambdaSecret = System.getenv("LAMBDA_SECRET");
-        context.getLogger().log("read secret from env LAMBDA_SECRET:  " + lambdaSecret);
-
-
-        // read secret by passing secret manager item and print it out
-        String secretArn = System.getenv("LAMBDA_SECRET_ARN");
-        String secretFromSecretManager = getsecret(secretArn);
-        context.getLogger().log("read secret from reading from secret manager:  " + secretFromSecretManager);
-
-        for (SQSMessage msg : sqsEvent.getRecords()) {
-            processMessage(msg, context);
-        }
-
-
-        context.getLogger().log("done");
-        return null;
-    }
-
-    private void processMessage(SQSMessage msg, Context context) {
-        try {
-
-            String msgBody = msg.getBody();
-            context.getLogger().log("Processed message " + msgBody);
-
-            // TODO: Do interesting work based on the new message
-
-        } catch (Exception e) {
-            context.getLogger().log("An error occurred");
-            throw e;
-        }
-
-    }
-
-    public String getsecret(String secretArn) {
-        AWSSecretsManager client = AWSSecretsManagerClientBuilder.defaultClient();
-
-        GetSecretValueRequest getSecretValueRequest = new GetSecretValueRequest()
-                .withSecretId(secretArn);
-        GetSecretValueResult getSecretValueResult = null;
-
-        try {
-            getSecretValueResult = client.getSecretValue(getSecretValueRequest);
-        } catch (Exception e) {
-            throw e;
-        }
-
-        String secret = getSecretValueResult.getSecretString();
-        return secret;
+    public String handleRequest(Object input, Context context) {
+        LocalDateTime currentTime = LocalDateTime.now();
+        String formattedTime = currentTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        System.out.println("Current time using system out println: " + formattedTime);
+        context.getLogger().log("Current Date and Time  using lambda log: " + formattedTime);
+        //ERROR StatusLogger Log4j2 could not find a logging implementation. Please add log4j-core to the classpath. Using SimpleLogger to log to the console...
+        logger.info("Current time using log4j: " + formattedTime);
+        return "Lambda function executed successfully.";
     }
 }
     
