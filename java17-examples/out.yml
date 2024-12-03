@@ -5,17 +5,24 @@ Resources:
   function:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://lambda-artifacts-a2fc6d0a966ac021/3a0275307a169f12a230a7ea8b95209a
+      CodeUri: s3://lambda-artifacts-a2fc6d0a966ac021/390eb0e6a4e91a0defdee64c652456f5
       Handler: example.HandlerIntegerJava17
       Runtime: java17
       Description: Java function
       MemorySize: 2048
-      Timeout: 10
+      Timeout: 900
       Policies:
       - AWSLambdaBasicExecutionRole
       - AWSLambda_ReadOnlyAccess
       - AWSXrayWriteOnlyAccess
       - AWSLambdaVPCAccessExecutionRole
+      - Statement:
+        - Effect: Allow
+          Action:
+          - s3:*
+          Resource:
+          - arn:aws:s3:::*
+          - arn:aws:s3:::*/*
       Tracing: Active
       Events:
         ScheduledEvent:

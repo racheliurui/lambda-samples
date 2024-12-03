@@ -11,13 +11,20 @@ Resources:
       Runtime: java17
       Description: Java function
       MemorySize: 2048
-      Timeout: 10
+      Timeout: 900 #15min
       # Function's execution role
       Policies:
         - AWSLambdaBasicExecutionRole
         - AWSLambda_ReadOnlyAccess
         - AWSXrayWriteOnlyAccess
         - AWSLambdaVPCAccessExecutionRole
+        - Statement:
+            - Effect: Allow
+              Action: 
+                - s3:*
+              Resource: 
+                - arn:aws:s3:::*
+                - arn:aws:s3:::*/*
       Tracing: Active
       Events:
         ScheduledEvent:
