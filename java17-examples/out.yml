@@ -4,8 +4,12 @@ Description: An AWS Lambda application that calls the Lambda API.
 Resources:
   function:
     Type: AWS::Serverless::Function
+    DependsOn:
+    - LambdaSecret
+    - SQSQueue
+    - DeadLetterQueue
     Properties:
-      CodeUri: s3://lambda-artifacts-a2fc6d0a966ac021/4d109a4fa86c06553cd9a3e294e0c105
+      CodeUri: s3://lambda-artifacts-a2fc6d0a966ac021/1f137f4bb12477912eb916f47a4cd625
       Handler: example.HandlerIntegerJava17
       Runtime: java17
       Description: Java function
@@ -17,7 +21,19 @@ Resources:
       - AWSXrayWriteOnlyAccess
       - AWSLambdaVPCAccessExecutionRole
       - AWSLambdaSQSQueueExecutionRole
+      - Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action:
+          - secretsmanager:GetSecretValue
+          Resource:
+            Ref: LambdaSecret
       Tracing: Active
+      Environment:
+        Variables:
+          LAMBDA_SECRET: '{{resolve:secretsmanager:LambdaSecret:SecretString:password}}'
+          LAMBDA_SECRET_ARN:
+            Ref: LambdaSecret
       Events:
         SQSQueue:
           Type: SQS
@@ -41,3 +57,11 @@ Resources:
     Type: AWS::SQS::Queue
     Properties:
       QueueName: MyLambdaDeadLetterQueue
+  LambdaSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: LambdaSecret
+      GenerateSecretString:
+        SecretStringTemplate: '{"password": "%%random-alpha-numeric:32%%"}'
+        GenerateStringKey: password
+        ExcludeCharacters: '"@/\'
