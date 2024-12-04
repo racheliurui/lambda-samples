@@ -14,18 +14,21 @@ import com.amazonaws.services.secretsmanager.model.GetSecretValueResult;
 
 // Handler value: example.HandlerInteger
 public class HandlerIntegerJava17 implements RequestHandler<SQSEvent, Void> {
+    // read secret by passing secret manager item and print it out
+    private int i=0;
+    private int j=0;
+    private String secretArn = System.getenv("LAMBDA_SECRET_ARN");
+    String secretFromSecretManager = getsecret(secretArn);
+
+
+    
+    
     @Override
     public Void handleRequest(SQSEvent sqsEvent, Context context) {
 
-        // get env varaible called LAMBDA_SECRET and print it out
-        String lambdaSecret = System.getenv("LAMBDA_SECRET");
-        context.getLogger().log("read secret from env LAMBDA_SECRET:  " + lambdaSecret);
+        j=j+1;
+        context.getLogger().log("use secret for the  "+ j + " times: " + secretFromSecretManager);
 
-
-        // read secret by passing secret manager item and print it out
-        String secretArn = System.getenv("LAMBDA_SECRET_ARN");
-        String secretFromSecretManager = getsecret(secretArn);
-        context.getLogger().log("read secret from reading from secret manager:  " + secretFromSecretManager);
 
         for (SQSMessage msg : sqsEvent.getRecords()) {
             processMessage(msg, context);
@@ -65,6 +68,7 @@ public class HandlerIntegerJava17 implements RequestHandler<SQSEvent, Void> {
         }
 
         String secret = getSecretValueResult.getSecretString();
+        System.out.println("retrieve secret from secret manager: " + secret);
         return secret;
     }
 }

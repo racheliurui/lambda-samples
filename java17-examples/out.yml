@@ -9,7 +9,7 @@ Resources:
     - SQSQueue
     - DeadLetterQueue
     Properties:
-      CodeUri: s3://lambda-artifacts-a2fc6d0a966ac021/20cee435509215104500c401f7284a54
+      CodeUri: s3://lambda-artifacts-a2fc6d0a966ac021/25dc272d7799e65094ab591953f46240
       Handler: example.HandlerIntegerJava17
       Runtime: java17
       Description: Java function
